@@ -30,12 +30,10 @@ func (s *chatServer) JoinChat(ctx context.Context, req *pb.JoinRequest) (*pb.Joi
 }
 
 func (s *chatServer) ChatStream(stream pb.ChatService_ChatStreamServer) error {
-	// Wait for the first message which should contain the username
 	firstMsg, err := stream.Recv()
 	if err != nil {
 		return err
 	}
-
 	user := firstMsg.User
 
 	s.mu.Lock()
@@ -45,48 +43,34 @@ func (s *chatServer) ChatStream(stream pb.ChatService_ChatStreamServer) error {
 	log.Printf("%s has connected", user)
 
 	// Send welcome message
-	welcomeMsg := &pb.Message{
+	s.broadcast <- &pb.Message{
 		User:      "Server",
 		Text:      fmt.Sprintf("%s has joined the chat!", user),
 		Timestamp: time.Now().Format(time.RFC3339),
 	}
-	s.broadcast <- welcomeMsg
 
-	// Handle client disconnection
 	defer func() {
 		s.mu.Lock()
 		delete(s.clients, stream)
 		s.mu.Unlock()
 
-		leaveMsg := &pb.Message{
+		s.broadcast <- &pb.Message{
 			User:      "Server",
 			Text:      fmt.Sprintf("%s has left the chat", user),
 			Timestamp: time.Now().Format(time.RFC3339),
 		}
-		s.broadcast <- leaveMsg
 		log.Printf("%s has disconnected", user)
 	}()
 
-	// Receive messages from client
-	go func() {
-		for {
-			msg, err := stream.Recv()
-			if err != nil {
-				return
-			}
-			msg.Timestamp = time.Now().Format(time.RFC3339)
-			s.broadcast <- msg
+	// Receive messages from this client and send to broadcast
+	for {
+		msg, err := stream.Recv()
+		if err != nil {
+			return nil // client disconnected or error
 		}
-	}()
-
-	// Send messages to client
-	for msg := range s.broadcast {
-		if err := stream.Send(msg); err != nil {
-			return err
-		}
+		msg.Timestamp = time.Now().Format(time.RFC3339)
+		s.broadcast <- msg
 	}
-
-	return nil
 }
 
 func newServer() *chatServer {
