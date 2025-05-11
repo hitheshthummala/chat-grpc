@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "github.com/hitheshthummala/grpc-chat/chat";
+
+service ChatService {
+    rpc ChatStream(stream Message) returns (stream Message) {}
+    rpc JoinChat(JoinRequest) returns (JoinResponse) {}
+}
+
+message JoinRequest {
+    string user = 1;
+}
+
+message JoinResponse {
+    string message = 1;
+}
+
+message Message {
+    string user = 1;
+    string text = 2;
+    string timestamp = 3;
+}
