@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	pb "github.com/hitheshthummala/grpc-chat/chat"
+	pb "github.com/hitheshthummala/chat-grpc/chat"
 	"google.golang.org/grpc"
 )
 
@@ -124,5 +124,3 @@ func main() {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
-
-// ... [rest of the server implementation remains the same as before]

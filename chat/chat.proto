@@ -2,8 +2,7 @@ syntax = "proto3";
 
 package chat;
 
-option go_package = "github.com/hitheshthummala/grpc-chat/chat";
-
+option go_package = "./chat";
 service ChatService {
     rpc ChatStream(stream Message) returns (stream Message) {}
     rpc JoinChat(JoinRequest) returns (JoinResponse) {}

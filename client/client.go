@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	pb "github.com/hitheshthummala/grpc-chat/chat"
+	pb "github.com/hitheshthummala/chat-grpc/chat"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
